@@ -28,6 +28,65 @@ class Ant
     end
 end
 
+def create_board(x, y)
+    return new_board = Array.new(x) {Array.new(y, "-")}
+end
+
+def create_ants(x, y)
+    ants_qty = (x * y * 0.4).ceil
+    puts "ants: " + ants_qty.to_s
+    new_ants_coord = Array.new(ants_qty)
+    for i in 1..ants_qty do
+        loop do
+            rand_x = rand(0..x-1)
+            rand_y = rand(0..y-1)
+            unless new_ants_coord.include? [rand_x, rand_y]
+                new_ants_coord[i-1] = [rand_x, rand_y] 
+                break
+            end
+        end
+    end
+    new_ants = []
+    for coord in new_ants_coord
+        a = Ant.new(coord[0], coord[1])
+        new_ants.append(a)
+    end
+    return new_ants
+end
+
+# getting board size
+length = 5
+width = 5
+loop do
+    puts "Enter board length (default value is 5)"
+    value = gets.to_i
+    if value > 1 and value < 10
+        length = value
+        break
+    elsif value == 0
+        puts "Selected default length = 5"
+        break
+    else
+        puts "Enter correct length (larger than 1 and lesser than 10)"
+    end
+end
+loop do
+    puts "Enter board width (default value is 5)"
+    value2 = gets.to_i
+    if value2 > 1 and value2 < 10
+        width = value2
+        break
+    elsif value2 == 0
+        puts "Selected default width = 5"
+        break
+    else
+        puts "Enter correct width (larger than 1 and lesser than 10)"
+    end
+end
+board = create_board(length, width)
+ants = create_ants(length, width)
+
+
 # a = Ant.new([])
 # a.take_leaf
 # if a.get_has_leaf 
