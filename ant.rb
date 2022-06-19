@@ -34,7 +34,6 @@ end
 
 def create_ants(x, y)
     ants_qty = (x * y * 0.4).ceil
-    puts "ants: " + ants_qty.to_s
     new_ants_coord = Array.new(ants_qty)
     for i in 1..ants_qty do
         loop do
@@ -52,6 +51,24 @@ def create_ants(x, y)
         new_ants.append(a)
     end
     return new_ants
+end
+
+def create_leaves(board, x, y)
+    qty = (x * y * 0.6).ceil
+    new_leaves_coord = Array.new(qty)
+    for i in 1..qty do
+        loop do
+            rand_x = rand(0..x-1)
+            rand_y = rand(0..y-1)
+            unless new_leaves_coord.include? [rand_x, rand_y]
+                new_leaves_coord[i-1] = [rand_x, rand_y] 
+                break
+            end
+        end
+    end
+    for coord in new_leaves_coord
+        board[coord[0]][coord[1]] = Leaf.new() 
+    end
 end
 
 # getting board size
@@ -85,6 +102,7 @@ loop do
 end
 board = create_board(length, width)
 ants = create_ants(length, width)
+create_leaves(board, length, width)
 
 
 # a = Ant.new([])
