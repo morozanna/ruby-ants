@@ -6,7 +6,7 @@ end
 
 class Leaf < Field
     attr_accessor :in_group
-    
+
     def initialize
         @in_group = false
     end
@@ -17,16 +17,16 @@ class Leaf < Field
 end
 
 class Ant
-    attr_accessor :x, :y, :hasLeaf
+    attr_accessor :x, :y, :carrying
 
     def initialize(x, y)
         @x = x
         @y= y
-        @hasLeaf = nil
+        @carrying = nil
     end
 
     def to_s
-        @hasLeaf.nil? ? "A" : "a" 
+        @carrying.nil? ? "A" : "a" 
     end
 end
 
@@ -71,6 +71,7 @@ def create_leaves(board, x, y)
     for coord in new_leaves_coord
         board[coord[0]][coord[1]] = Leaf.new() 
     end
+    return qty
 end
 
 def print_boards(board, ants)
@@ -96,6 +97,18 @@ def print_boards(board, ants)
         print "\n"
     end
 end
+
+def get_move_coord(init_x, init_y, direction)
+    if direction == 1:
+        return init_x, init_y - 1
+    if direction == 2:
+        return init_x + 1, init_y
+    if direction == 3:
+        return init_x, init_y + 1
+    if direction == 4:
+        return init_x - 1, init_y
+end
+
 
 # getting board size
 length = 5
@@ -128,15 +141,21 @@ loop do
 end
 board = create_board(length, width)
 ants = create_ants(length, width)
-create_leaves(board, length, width)
+leaves_qty = create_leaves(board, length, width)
 puts "Leaves and Ants before: "
 print_boards(board, ants)
-
-
-# a = Ant.new([])
-# a.take_leaf
-# if a.get_has_leaf 
-#     puts "ant has a leaf"
-# else
-#     puts "somethig is not yes"
-# end
+step = 0
+while true
+    leaves = []
+    board.each do |row|
+        row.each do |f|
+            if f.instance_of? Leaf
+                leaves.append(f.in_group)
+            end
+        end
+    end
+    if leaves.all? and leaves.length() == leaves_qty
+        break
+    end
+    do_step(board, ants)
+end
