@@ -109,6 +109,40 @@ def get_move_coord(init_x, init_y, direction)
         return init_x - 1, init_y
 end
 
+def is_on_board(x, y, board)
+    length = board.length()
+    width = board[0].length()
+
+    return x >= 0 and y >= 0 and x < length and y < width 
+end
+
+def do_step(board, ants)
+    ants.each do |ant|
+        #picking up a leaf
+        if board[ant.y][ant.x].instance_of? Leaf and !board[ant.y][ant.x].in_group
+            leaf = board[ant.y][ant.x]
+            board[ant.y][ant.x] = Field.new()
+            ant.carrying = leaf
+            next
+        end
+        #dropping a leaf
+        unless board[ant.y][ant.x].instance_of? Leaf and ant.carrying.nil?
+            found_leaf = false
+            for i in 1..4 do
+                leaf_x, leaf_y = get_move_coord(ant.x, ant.y, i)
+                if is_on_board(leaf_x, leaf_y, board) and board[leaf_y[leaf_x]].instance_of? Leaf
+                    found_leaf = true
+                    board[ant.y][ant.x] = ant.carrying
+                    ant.carrying = nil
+                end
+            end
+            if found_leaf:
+                next
+            end
+        end
+        #just move
+    end
+end
 
 # getting board size
 length = 5
