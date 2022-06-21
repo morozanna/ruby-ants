@@ -5,7 +5,8 @@ class Field
 end
 
 class Leaf < Field
-
+    attr_accessor :in_group
+    
     def initialize
         @in_group = false
     end
@@ -16,7 +17,8 @@ class Leaf < Field
 end
 
 class Ant
-    
+    attr_accessor :x, :y, :hasLeaf
+
     def initialize(x, y)
         @x = x
         @y= y
@@ -24,7 +26,7 @@ class Ant
     end
 
     def to_s
-        @hasLeaf.nil? ? "A*" : "A" 
+        @hasLeaf.nil? ? "A" : "a" 
     end
 end
 
@@ -71,6 +73,30 @@ def create_leaves(board, x, y)
     end
 end
 
+def print_boards(board, ants)
+    for y in 0..board.length()-1 do
+        for x in 0..board[0].length()-1 do
+            ant = []
+            ants.each do |a|
+                if a.x == x and a.y == y
+                    ant.append(a)
+                end
+            end
+            ant = ant.length() > 0 ? ant[0] : nil
+            if ant.nil?
+                print board[y][x].to_s
+            else
+                print ant.to_s
+            end
+        end
+        print "\t"
+        for x in 0..board[0].length() do
+            print board[y][x].to_s
+        end
+        print "\n"
+    end
+end
+
 # getting board size
 length = 5
 width = 5
@@ -103,6 +129,8 @@ end
 board = create_board(length, width)
 ants = create_ants(length, width)
 create_leaves(board, length, width)
+puts "Leaves and Ants before: "
+print_boards(board, ants)
 
 
 # a = Ant.new([])
