@@ -116,6 +116,20 @@ def is_on_board(x, y, board)
     return x >= 0 and y >= 0 and x < length and y < width 
 end
 
+def add_to_group(board, leaf_x, leaf_y, excluded)
+    return unless board[leaf_y][leaf_x].instance_of? Leaf
+    board[leaf_y][leaf_x].in_group = true
+    excluded.append(board[leaf_y][leaf_x])
+    for i in 0..3 do
+        neigh_x, neigh_y = get_move_coord(leaf_x, leaf_y, i)
+        if excluded.include? board[neigh_y][neigh_x] or !is_on_board(neigh_x, neigh_y) or !board[neigh_y][neigh_x].instance_of? Leaf
+            next
+        end
+        add_to_group(board, neigh_x, neigh_y, excluded)
+    end
+
+end
+
 def do_step(board, ants)
     ants.each do |ant|
         #picking up a leaf
