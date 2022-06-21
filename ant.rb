@@ -26,12 +26,12 @@ class Ant
     end
 
     def to_s
-        @carrying.nil? ? "A" : "a" 
+        @carrying.nil? ? "A" : "a"
     end
 end
 
 def create_board(x, y)
-    return new_board = Array.new(x) {Array.new(y, "-")}
+    return new_board = Array.new(x) {Array.new(y, Field.new)}
 end
 
 def create_ants(x, y)
@@ -41,8 +41,8 @@ def create_ants(x, y)
         loop do
             rand_x = rand(0..x-1)
             rand_y = rand(0..y-1)
-            unless new_ants_coord.include? [rand_x, rand_y]
-                new_ants_coord[i-1] = [rand_x, rand_y] 
+            unless new_ants_coord.include? [rand_y, rand_x]
+                new_ants_coord[i-1] = [rand_y, rand_x]
                 break
             end
         end
@@ -62,14 +62,14 @@ def create_leaves(board, y, x)
         loop do
             rand_x = rand(0..x-1)
             rand_y = rand(0..y-1)
-            unless new_leaves_coord.include? [rand_x, rand_y]
-                new_leaves_coord[i-1] = [rand_y, rand_x] 
+            unless new_leaves_coord.include? [rand_y, rand_x]
+                new_leaves_coord[i-1] = [rand_y, rand_x]
                 break
             end
         end
     end
     for coord in new_leaves_coord
-        board[coord[0]][coord[1]] = Leaf.new() 
+        board[coord[0]][coord[1]] = Leaf.new()
     end
     return qty
 end
@@ -77,13 +77,12 @@ end
 def print_boards(board, ants)
     for y in 0..board.length()-1 do
         for x in 0..board[0].length()-1 do
-            ant = []
+            ant = nil
             ants.each do |a|
                 if a.x == x and a.y == y
-                    ant.append(a)
+                    ant = a
                 end
             end
-            ant = ant.length() > 0 ? ant[0] : nil
             if ant.nil?
                 print board[y][x].to_s
             else
@@ -91,7 +90,7 @@ def print_boards(board, ants)
             end
         end
         print "\t"
-        for x in 0..board[0].length() do
+        for x in 0..board[0].length()-1 do
             print board[y][x].to_s
         end
         print "\n"
@@ -136,7 +135,7 @@ end
 def do_step(board, ants)
     ants.each do |ant|
         #picking up a leaf
-        if board[ant.y][ant.x].instance_of? Leaf and !board[ant.y][ant.x].in_group
+        if board[ant.y][ant.x].instance_of? Leaf and !board[ant.y][ant.x].in_group and ant.carrying.nil?
             leaf = board[ant.y][ant.x]
             board[ant.y][ant.x] = Field.new
             ant.carrying = leaf
@@ -152,6 +151,7 @@ def do_step(board, ants)
                     board[ant.y][ant.x] = ant.carrying
                     ant.carrying = nil
                     add_to_group(board, ant.x, ant.y, [])
+                    break
                 end
             end
             if found_leaf
@@ -159,28 +159,24 @@ def do_step(board, ants)
             end
         end
         #just move
-        can_move = false
+        legal_moves = []
         for i in 1..4 do
             new_x, new_y = get_move_coord(ant.x, ant.y, i)
-            neighbour_ant = []
+            neighbour_ant = nil
             ants.each do |a|
                 if a.x == new_x and a.y == new_y
-                    neighbour_ant.append(a)
+                    neighbour_ant = a
                 end
             end
-            can_move = neighbour_ant.length() == 0
-            break if can_move
-        end
-        next unless can_move 
-        while true
-            d = rand(1..4)
-            new_x, new_y = get_move_coord(ant.x, ant.y, d)
-            if is_on_board(new_x, new_y, board)
-                ant.x = new_x
-                ant.y = new_y
-                break
+            if neighbour_ant.nil? and is_on_board(new_x, new_y, board)
+                legal_moves.append(i)
             end
         end
+        next unless legal_moves.length() > 0
+        d = legal_moves.sample
+        new_x, new_y = get_move_coord(ant.x, ant.y, d)
+        ant.x = new_x
+        ant.y = new_y
     end
 end
 
@@ -190,27 +186,27 @@ width = 5
 loop do
     puts "Enter board length (default value is 5)"
     value = gets.to_i
-    if value > 1 and value < 10
+    if value > 2 and value < 10
         length = value
         break
     elsif value == 0
         puts "Selected default length = 5"
         break
     else
-        puts "Enter correct length (larger than 1 and lesser than 10)"
+        puts "Enter correct length (larger than 2 and lesser than 10)"
     end
 end
 loop do
     puts "Enter board width (default value is 5)"
     value2 = gets.to_i
-    if value2 > 1 and value2 < 10
+    if value2 > 2 and value2 < 10
         width = value2
         break
     elsif value2 == 0
         puts "Selected default width = 5"
         break
     else
-        puts "Enter correct width (larger than 1 and lesser than 10)"
+        puts "Enter correct width (larger than 2 and lesser than 10)"
     end
 end
 board = create_board(length, width)
@@ -228,7 +224,10 @@ while true
             end
         end
     end
-    break if leaves.all? and leaves.length() == leaves_qty
+
+    if leaves.all? and leaves.length() == leaves_qty
+        break
+    end
     step += 1
     puts "Step: #{step}"
     do_step(board, ants)
